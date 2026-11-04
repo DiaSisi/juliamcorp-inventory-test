@@ -157,47 +157,50 @@ function App() {
         </form>
       </div>
 
-      <table border={1} cellPadding={12} style={{ width: '100%', textAlign: 'left', borderCollapse: 'collapse' }}>
-        <thead style={{ backgroundColor: '#242424', color: 'white' }}>
-          <tr>
-            <th>SKU</th>
-            <th>Producto</th>
-            <th>Categoría</th>
-            <th>U/M</th>
-            <th>Físico</th>
-            <th>Comprometido</th>
-            <th>Disponible</th>
-            <th>Punto Reorden</th>
-            <th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          {inventory.length === 0 ? (
-            <tr><td colSpan={9} style={{ textAlign: 'center' }}>No hay productos registrados en el almacén.</td></tr>
-          ) : (
-            inventory.map((item) => (
-              <tr key={item.id}>
-                <td><strong>{item.id}</strong></td>
-                <td>{item.name}</td>
-                <td>{item.category}</td>
-                <td>{item.uom}</td>
-                <td>{item.physicalStock}</td>
-                <td>{item.committedStock}</td>
-                <td>
-                  <span style={{ color: item.availableStock <= item.reorderPoint ? 'red' : 'green', fontWeight: 'bold' }}>
-                    {item.availableStock}
-                  </span>
-                </td>
-                <td>{item.reorderPoint}</td>
-                <td style={{ display: 'flex', gap: '10px' }}>
-                  <button onClick={() => handleEdit(item)} style={{ background: '#2196F3', color: 'white', border: 'none', padding: '6px 12px', cursor: 'pointer', borderRadius: '4px' }}>Editar</button>
-                  <button onClick={() => handleDelete(item.id)} style={{ background: '#f44336', color: 'white', border: 'none', padding: '6px 12px', cursor: 'pointer', borderRadius: '4px' }}>Eliminar</button>
-                </td>
-              </tr>
-            ))
-          )}
-        </tbody>
-      </table>
+      {/* Responsive */}
+      <div style={{ overflowX: 'auto', borderRadius: '8px', border: '1px solid #eaeaea' }}>
+        <table border={1} cellPadding={12} style={{ width: '100%', textAlign: 'left', borderCollapse: 'collapse', minWidth: '900px' }}>
+          <thead style={{ backgroundColor: '#242424', color: 'white' }}>
+            <tr>
+              <th>SKU</th>
+              <th>Producto</th>
+              <th>Categoría</th>
+              <th>U/M</th>
+              <th>Físico</th>
+              <th>Comprometido</th>
+              <th>Disponible</th>
+              <th>Punto Reorden</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            {inventory.length === 0 ? (
+              <tr><td colSpan={9} style={{ textAlign: 'center' }}>No hay productos registrados en el almacén.</td></tr>
+            ) : (
+              inventory.map((item) => (
+                <tr key={item.id}>
+                  <td><strong>{item.id}</strong></td>
+                  <td>{item.name}</td>
+                  <td>{item.category}</td>
+                  <td>{item.uom}</td>
+                  <td>{item.physicalStock}</td>
+                  <td>{item.committedStock}</td>
+                  <td>
+                    <span style={{ color: item.availableStock <= item.reorderPoint ? 'red' : 'green', fontWeight: 'bold' }}>
+                      {item.availableStock}
+                    </span>
+                  </td>
+                  <td>{item.reorderPoint}</td>
+                  <td style={{ display: 'flex', gap: '10px' }}>
+                    <button onClick={() => handleEdit(item)} style={{ background: '#2196F3', color: 'white', border: 'none', padding: '6px 12px', cursor: 'pointer', borderRadius: '4px' }}>Editar</button>
+                    <button onClick={() => handleDelete(item.id)} style={{ background: '#f44336', color: 'white', border: 'none', padding: '6px 12px', cursor: 'pointer', borderRadius: '4px' }}>Eliminar</button>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
