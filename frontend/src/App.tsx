@@ -13,6 +13,11 @@ interface InventoryItem {
 
 function App() {
   const [inventory, setInventory] = useState<InventoryItem[]>([]);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [formData, setFormData] = useState({
+    id: '', name: '', category: 'Empaque', uom: 'Unidad', 
+    physicalStock: 0, committedStock: 0, reorderPoint: 0
+  });
 
   const fetchInventory = async () => {
     try {
@@ -28,11 +33,97 @@ function App() {
     fetchInventory();
   }, []);
 
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const payload = {
+      ...formData,
+      physicalStock: Number(formData.physicalStock),
+      committedStock: Number(formData.committedStock),
+      reorderPoint: Number(formData.reorderPoint),
+    };
+
+    if (editingId) {
+      // Actualizar producto (PATCH)
+      await fetch(`http://localhost:3000/inventory/${editingId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      setEditingId(null);
+    } else {
+      // Crear nuevo producto (POST)
+      await fetch('http://localhost:3000/inventory', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+    }
+    
+    setFormData({ id: '', name: '', category: 'Empaque', uom: 'Unidad', physicalStock: 0, committedStock: 0, reorderPoint: 0 });
+    fetchInventory();
+  };
+
+  const handleEdit = (item: InventoryItem) => {
+    setFormData({ ...item });
+    setEditingId(item.id);
+  };
+
+  const handleDelete = async (id: string) => {
+    await fetch(`http://localhost:3000/inventory/${id}`, { method: 'DELETE' });
+    fetchInventory();
+  };
+
   return (
-    <div style={{ padding: '20px', fontFamily: 'sans-serif' }}>
+    <div style={{ padding: '20px', fontFamily: 'sans-serif', maxWidth: '1200px', margin: '0 auto' }}>
       <h1>📦 Panel de Inventario Central - Juliam Corp</h1>
       
-      <table border={1} cellPadding={12} style={{ width: '100%', textAlign: 'left', borderCollapse: 'collapse', marginTop: '20px' }}>
+      {/* Formulario Mejorado */}
+      <div style={{ background: '#f5f5f5', padding: '20px', borderRadius: '8px', marginBottom: '20px', color: '#333' }}>
+        <h3 style={{ marginTop: 0 }}>{editingId ? 'Editar Producto' : 'Registrar Nuevo Producto'}</h3>
+        
+        <form onSubmit={handleSubmit} style={{ display: 'flex', gap: '15px', flexWrap: 'wrap', alignItems: 'flex-end' }}>
+          
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
+            <label style={{ fontSize: '13px', fontWeight: 'bold', marginBottom: '5px' }}>SKU (Código)</label>
+            <input type="text" required disabled={!!editingId} value={formData.id} onChange={e => setFormData({...formData, id: e.target.value})} style={{ padding: '6px' }} />
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
+            <label style={{ fontSize: '13px', fontWeight: 'bold', marginBottom: '5px' }}>Nombre del Producto</label>
+            <input type="text" required value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} style={{ padding: '6px' }} />
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
+            <label style={{ fontSize: '13px', fontWeight: 'bold', marginBottom: '5px' }}>Stock Físico</label>
+            <input type="number" required min="0" value={formData.physicalStock} onChange={e => setFormData({...formData, physicalStock: Number(e.target.value)})} style={{ padding: '6px', width: '90px' }} />
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
+            <label style={{ fontSize: '13px', fontWeight: 'bold', marginBottom: '5px' }}>Comprometido</label>
+            <input type="number" required min="0" value={formData.committedStock} onChange={e => setFormData({...formData, committedStock: Number(e.target.value)})} style={{ padding: '6px', width: '100px' }} />
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
+            <label style={{ fontSize: '13px', fontWeight: 'bold', marginBottom: '5px' }}>Pto. de Reorden</label>
+            <input type="number" required min="0" value={formData.reorderPoint} onChange={e => setFormData({...formData, reorderPoint: Number(e.target.value)})} style={{ padding: '6px', width: '110px' }} />
+          </div>
+
+          <div style={{ display: 'flex', gap: '10px' }}>
+            <button type="submit" style={{ background: editingId ? '#2196F3' : '#4CAF50', color: 'white', border: 'none', padding: '8px 16px', cursor: 'pointer', borderRadius: '4px', height: '32px' }}>
+              {editingId ? 'Actualizar' : 'Agregar'}
+            </button>
+            
+            {editingId && (
+              <button type="button" onClick={() => { setEditingId(null); setFormData({ id: '', name: '', category: 'Empaque', uom: 'Unidad', physicalStock: 0, committedStock: 0, reorderPoint: 0 }); }} style={{ background: '#9e9e9e', color: 'white', border: 'none', padding: '8px 16px', cursor: 'pointer', borderRadius: '4px', height: '32px' }}>
+                Cancelar
+              </button>
+            )}
+          </div>
+        </form>
+      </div>
+
+      {/* Tabla de Inventario */}
+      <table border={1} cellPadding={12} style={{ width: '100%', textAlign: 'left', borderCollapse: 'collapse' }}>
         <thead style={{ backgroundColor: '#242424', color: 'white' }}>
           <tr>
             <th>SKU</th>
@@ -43,13 +134,12 @@ function App() {
             <th>Comprometido</th>
             <th>Disponible</th>
             <th>Punto Reorden</th>
+            <th>Acciones</th>
           </tr>
         </thead>
         <tbody>
           {inventory.length === 0 ? (
-            <tr>
-              <td colSpan={8} style={{ textAlign: 'center' }}>No hay productos registrados en el almacén.</td>
-            </tr>
+            <tr><td colSpan={9} style={{ textAlign: 'center' }}>No hay productos registrados en el almacén.</td></tr>
           ) : (
             inventory.map((item) => (
               <tr key={item.id}>
@@ -60,15 +150,19 @@ function App() {
                 <td>{item.physicalStock}</td>
                 <td>{item.committedStock}</td>
                 <td>
-                  {}
-                  <span style={{ 
-                    color: item.availableStock <= item.reorderPoint ? 'red' : 'green',
-                    fontWeight: 'bold' 
-                  }}>
+                  <span style={{ color: item.availableStock <= item.reorderPoint ? 'red' : 'green', fontWeight: 'bold' }}>
                     {item.availableStock}
                   </span>
                 </td>
                 <td>{item.reorderPoint}</td>
+                <td style={{ display: 'flex', gap: '10px' }}>
+                  <button onClick={() => handleEdit(item)} style={{ background: '#2196F3', color: 'white', border: 'none', padding: '6px 12px', cursor: 'pointer', borderRadius: '4px' }}>
+                    Editar
+                  </button>
+                  <button onClick={() => handleDelete(item.id)} style={{ background: '#f44336', color: 'white', border: 'none', padding: '6px 12px', cursor: 'pointer', borderRadius: '4px' }}>
+                    Eliminar
+                  </button>
+                </td>
               </tr>
             ))
           )}
