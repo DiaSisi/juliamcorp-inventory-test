@@ -73,9 +73,15 @@ function App() {
 
   return (
     <div style={{ padding: '20px', fontFamily: 'sans-serif', maxWidth: '1200px', margin: '0 auto' }}>
-      <h1>📦 Panel de Inventario Central - Juliam Corp</h1>
-      
-      {/* Formulario con Datalist para Categoría y U/M */}
+
+      {/* Header */}
+      <div style={{ borderBottom: '2px solid #eaeaea', paddingBottom: '15px', marginBottom: '25px' }}>
+        <h1 style={{ margin: '0 0 5px 0', display: 'flex', alignItems: 'center', gap: '10px', color: '#2c3e50' }}>
+          📦 Panel de Inventario
+        </h1>
+        <h3 style={{ margin: 0, color: '#7f8c8d', fontWeight: '500' }}>Juliam Corp</h3>
+      </div>
+
       <div style={{ background: '#f5f5f5', padding: '20px', borderRadius: '8px', marginBottom: '20px', color: '#333' }}>
         <h3 style={{ marginTop: 0 }}>{editingId ? 'Editar Producto' : 'Registrar Nuevo Producto'}</h3>
         
@@ -88,7 +94,14 @@ function App() {
 
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             <label style={{ fontSize: '13px', fontWeight: 'bold', marginBottom: '5px' }}>Nombre del Producto</label>
-            <input type="text" required value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} style={{ padding: '6px', width: '160px' }} />
+            <input type="text" list="nombres-list" required placeholder="Ej. Cajas de Cartón" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} style={{ padding: '6px', width: '160px' }} />
+            <datalist id="nombres-list">
+              <option value="Cajas de Cartón" />
+              <option value="Cinta Adhesiva" />
+              <option value="Plástico Burbuja" />
+              <option value="Etiquetas Térmicas" />
+              <option value="Pallets de Madera" />
+            </datalist>
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column' }}>
